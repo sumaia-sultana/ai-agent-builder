@@ -1,0 +1,128 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+:root {
+  --surface: #ffffffd9;
+  --surface-strong: #ffffff;
+  --line: #dbe3ee;
+  --line-strong: #c7d2e2;
+  --ink: #122033;
+  --ink-soft: #4e6178;
+  --brand: #0f766e;
+  --brand-strong: #0b5f59;
+  --warm: #c0611a;
+}
+
+body {
+  font-family: 'Manrope', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 10% 0%, #ccfbf140 0, transparent 40%),
+    radial-gradient(circle at 90% 10%, #ffedd540 0, transparent 35%),
+    linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+h1,
+h2,
+h3 {
+  font-family: 'Space Grotesk', 'Manrope', sans-serif;
+}
+
+.app-shell {
+  position: relative;
+  isolation: isolate;
+}
+
+.panel-card {
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, var(--surface) 0%, var(--surface-strong) 85%);
+  box-shadow: 0 18px 35px -24px rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(8px);
+}
+
+.panel-header {
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(90deg, #f8fafc 0%, #f0fdfa 100%);
+}
+
+.select-elevated,
+.input-elevated {
+  border: 1px solid var(--line-strong);
+  background: #fff;
+  transition: all 160ms ease;
+}
+
+.select-elevated:focus,
+.input-elevated:focus {
+  border-color: #14b8a6;
+  box-shadow: 0 0 0 3px #14b8a633;
+}
+
+.cta-btn {
+  background: linear-gradient(135deg, var(--brand) 0%, #0d9488 100%);
+  color: #fff;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.cta-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 20px -14px #0f766e;
+}
+
+.subtle-btn {
+  border: 1px solid var(--line-strong);
+  background: #fff;
+}
+
+.soft-tag {
+  border: 1px solid #d1fae5;
+  background: #f0fdfa;
+  color: #0f766e;
+}
+
+.warm-tag {
+  border: 1px solid #fed7aa;
+  background: #fff7ed;
+  color: var(--warm);
+}
+
+.footer-shell {
+  border-top: 1px solid #dce6f1;
+  background:
+    linear-gradient(90deg, #f8fafc 0%, #f0fdfa 52%, #fff7ed 100%);
+  box-shadow: 0 -8px 24px -24px rgba(15, 23, 42, 0.4);
+}
+
+.footer-note {
+  color: #486077;
+  letter-spacing: 0.01em;
+}
+
+.footer-resume-btn {
+  color: #ffffff;
+  background: linear-gradient(135deg, #0f766e 0%, #0d9488 65%, #14b8a6 100%);
+  box-shadow: 0 10px 20px -14px #0f766e;
+  transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
+}
+
+.footer-resume-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 22px -12px #0f766e;
+  filter: saturate(1.08);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .fade-in-up {
+    animation: fadeInUp 420ms ease both;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
