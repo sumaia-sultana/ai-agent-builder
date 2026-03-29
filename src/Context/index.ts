@@ -5,25 +5,22 @@ export interface AgentContextValue {
   data: AgentData | null
   loading: boolean
   error: string | null
-  sessionTime: number
   selectedProfile: string
   selectedSkills: string[]
   selectedLayers: string[]
   selectedProvider: string
   agentName: string
   savedAgents: SavedAgent[]
-  setSelectedProfile: (value: string) => void
-  setSelectedProvider: (value: string) => void
-  setSelectedSkills: (skills: string[]) => void
-  setSelectedLayers: (layers: string[]) => void
-  setAgentName: (name: string) => void
+  setSelectedProfile: React.Dispatch<React.SetStateAction<string>>
+  setSelectedProvider: React.Dispatch<React.SetStateAction<string>>
+  setSelectedSkills: React.Dispatch<React.SetStateAction<string[]>>
+  setSelectedLayers: React.Dispatch<React.SetStateAction<string[]>>
+  setAgentName: React.Dispatch<React.SetStateAction<string>>
   setSavedAgents: React.Dispatch<React.SetStateAction<SavedAgent[]>>
   fetchAPI: () => Promise<void>
-  handleLayerSelect: (e: React.ChangeEvent<HTMLSelectElement>) => void
-  handleSkillSelect: (e: React.ChangeEvent<HTMLSelectElement>) => void
   handleSaveAgent: () => void
   handleLoadAgent: (agent: SavedAgent) => void
-  handleDeleteAgent: (indexToRemove: number) => void
+  handleDeleteAgent: (agentId: string) => void
   clearSavedAgents: () => void
 }
 

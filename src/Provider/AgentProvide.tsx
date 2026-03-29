@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AgentContext } from '../Context'
 import type { AgentData, SavedAgent } from '../types/agentData'
 
@@ -18,49 +18,56 @@ export default function AgentProvider({ children }: AgentProviderProps) {
 
   const [agentName, setAgentName] = useState('')
   const [savedAgents, setSavedAgents] = useState<SavedAgent[]>([])
-
-  const [sessionTime, setSessionTime] = useState(0)
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setSessionTime((prev) => prev + 1)
-    }, 1000)
-
-    return () => clearInterval(interval)
-  }, [])
+  const latestAgentNameRef = useRef('')
 
   useEffect(() => {
     const saved = localStorage.getItem('savedAgents')
 
-    if (saved) {
-      try {
-        setSavedAgents(JSON.parse(saved))
-      } catch (e) {
-        console.error('Failed to parse saved agents', e)
-      }
+    if (!saved) return
+
+    try {
+      const parsed = JSON.parse(saved) as Array<Partial<SavedAgent>>
+      const normalized = parsed.map((agent, index) => ({
+        id: agent.id || `legacy-${Date.now()}-${index}`,
+        name: agent.name || 'Untitled Agent',
+        profileId: agent.profileId || '',
+        skillIds: agent.skillIds || [],
+        layerIds: agent.layerIds || [],
+        provider: agent.provider || '',
+      }))
+
+      setSavedAgents(normalized)
+    } catch (e) {
+      console.error('Failed to parse saved agents', e)
     }
   }, [])
 
+  const persistSavedAgents = useCallback((agents: SavedAgent[]) => {
+    setSavedAgents(agents)
+    localStorage.setItem('savedAgents', JSON.stringify(agents))
+  }, [])
+
+  useEffect(() => {
+    latestAgentNameRef.current = agentName
+  }, [agentName])
+
   useEffect(() => {
     const analyticsInterval = setInterval(() => {
-      if (agentName !== '') {
-        console.log(`[Analytics Heartbeat] User is working on agent named: "${agentName}"`)
+      if (latestAgentNameRef.current !== '') {
+        console.log(`[Analytics Heartbeat] User is working on agent named: "${latestAgentNameRef.current}"`)
       } else {
         console.log('[Analytics Heartbeat] User is working on an unnamed agent draft...')
       }
     }, 8000)
 
     return () => clearInterval(analyticsInterval)
-  }, [agentName])
+  }, [])
 
-  const fetchAPI = async () => {
+  const fetchAPI = useCallback(async () => {
     setLoading(true)
     setError(null)
 
     try {
-      const delay = Math.floor(Math.random() * 2000) + 1000
-      await new Promise((resolve) => setTimeout(resolve, delay))
-
       const response = await fetch('/data.json')
 
       if (!response.ok) {
@@ -80,41 +87,28 @@ export default function AgentProvider({ children }: AgentProviderProps) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
     fetchAPI()
-  }, [])
+  }, [fetchAPI])
 
-  const handleLayerSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const layerId = e.target.value
+  const handleSaveAgent = useCallback(() => {
+    const missingFields: string[] = []
 
-    if (layerId && !selectedLayers.includes(layerId)) {
-      setSelectedLayers((prev) => [...prev, layerId])
-    }
+    if (!agentName.trim()) missingFields.push('Agent Name')
+    if (!selectedProfile) missingFields.push('Base Profile')
+    if (!selectedProvider) missingFields.push('AI Provider')
+    if (selectedSkills.length === 0) missingFields.push('at least one Skill')
+    if (selectedLayers.length === 0) missingFields.push('at least one Personality Layer')
 
-    e.target.value = ''
-    fetchAPI()
-  }
-
-  const handleSkillSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const skillId = e.target.value
-
-    if (skillId && !selectedSkills.includes(skillId)) {
-      setSelectedSkills((prev) => [...prev, skillId])
-    }
-
-    e.target.value = ''
-    fetchAPI()
-  }
-
-  const handleSaveAgent = () => {
-    if (!agentName.trim()) {
-      alert('Please enter a name for your agent.')
+    if (missingFields.length > 0) {
+      alert(`Please complete: ${missingFields.join(', ')}`)
       return
     }
 
     const newAgent: SavedAgent = {
+      id: globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
       name: agentName,
       profileId: selectedProfile,
       skillIds: selectedSkills,
@@ -123,56 +117,71 @@ export default function AgentProvider({ children }: AgentProviderProps) {
     }
 
     const updatedAgents = [...savedAgents, newAgent]
-    setSavedAgents(updatedAgents)
-    localStorage.setItem('savedAgents', JSON.stringify(updatedAgents))
+    persistSavedAgents(updatedAgents)
     setAgentName('')
     alert(`Agent "${newAgent.name}" saved successfully!`)
-  }
+  }, [agentName, persistSavedAgents, savedAgents, selectedLayers, selectedProfile, selectedProvider, selectedSkills])
 
-  const handleLoadAgent = (agent: SavedAgent) => {
+  const handleLoadAgent = useCallback((agent: SavedAgent) => {
     setSelectedProfile(agent.profileId || '')
     setSelectedSkills(agent.skillIds || [])
     setSelectedLayers([...(agent.layerIds || [])])
     setAgentName(agent.name)
     setSelectedProvider(agent.provider || '')
-  }
+  }, [])
 
-  const handleDeleteAgent = (indexToRemove: number) => {
-    const updatedAgents = savedAgents.filter((_, index) => index !== indexToRemove)
-    setSavedAgents(updatedAgents)
-    localStorage.setItem('savedAgents', JSON.stringify(updatedAgents))
-  }
+  const handleDeleteAgent = useCallback(
+    (agentId: string) => {
+      const updatedAgents = savedAgents.filter((agent) => agent.id !== agentId)
+      persistSavedAgents(updatedAgents)
+    },
+    [persistSavedAgents, savedAgents],
+  )
 
-  const clearSavedAgents = () => {
-    setSavedAgents([])
-    localStorage.removeItem('savedAgents')
-  }
+  const clearSavedAgents = useCallback(() => {
+    persistSavedAgents([])
+  }, [persistSavedAgents])
 
-  const value = {
-    data,
-    loading,
-    error,
-    sessionTime,
-    selectedProfile,
-    selectedSkills,
-    selectedLayers,
-    selectedProvider,
-    agentName,
-    savedAgents,
-    setSelectedProfile,
-    setSelectedProvider,
-    setSelectedSkills,
-    setSelectedLayers,
-    setAgentName,
-    setSavedAgents,
-    fetchAPI,
-    handleLayerSelect,
-    handleSkillSelect,
-    handleSaveAgent,
-    handleLoadAgent,
-    handleDeleteAgent,
-    clearSavedAgents,
-  }
+  const value = useMemo(
+    () => ({
+      data,
+      loading,
+      error,
+      selectedProfile,
+      selectedSkills,
+      selectedLayers,
+      selectedProvider,
+      agentName,
+      savedAgents,
+      setSelectedProfile,
+      setSelectedProvider,
+      setSelectedSkills,
+      setSelectedLayers,
+      setAgentName,
+      setSavedAgents,
+      fetchAPI,
+      handleSaveAgent,
+      handleLoadAgent,
+      handleDeleteAgent,
+      clearSavedAgents,
+    }),
+    [
+      agentName,
+      clearSavedAgents,
+      data,
+      error,
+      fetchAPI,
+      handleDeleteAgent,
+      handleLoadAgent,
+      handleSaveAgent,
+      loading,
+      savedAgents,
+      selectedLayers,
+      selectedProfile,
+      selectedProvider,
+      selectedSkills,
+    ],
+  )
 
   return <AgentContext.Provider value={value}>{children}</AgentContext.Provider>
 }

@@ -1,19 +1,26 @@
+import { useCallback, useMemo } from 'react'
 import { User, Zap, Layers, Trash2, FolderOpen } from 'lucide-react'
 import { useAgent } from '../Context'
 
 export default function SaveAgent() {
   const { savedAgents, data, handleLoadAgent, handleDeleteAgent, clearSavedAgents } = useAgent()
+  const profileById = useMemo(
+    () => new Map((data?.agentProfiles || []).map((profile) => [profile.id, profile])),
+    [data?.agentProfiles],
+  )
+
+  const handleClearAll = useCallback(() => {
+    if (confirm('Are you sure you want to clear all saved agents?')) {
+      clearSavedAgents()
+    }
+  }, [clearSavedAgents])
 
   return (
     <section className="panel-card fade-in-up overflow-hidden rounded-2xl">
       <div className="panel-header flex items-center justify-between gap-3 px-6 py-5">
         <h2 className="text-lg font-semibold text-slate-900">Saved Agents</h2>
         <button
-          onClick={() => {
-            if (confirm('Are you sure you want to clear all saved agents?')) {
-              clearSavedAgents()
-            }
-          }}
+          onClick={handleClearAll}
           className="inline-flex items-center gap-1.5 rounded-md border border-red-200 bg-red-50 px-3 py-1.5 text-sm font-semibold text-red-700 transition-colors hover:bg-red-100"
         >
           <Trash2 className="w-4 h-4" />
@@ -23,9 +30,9 @@ export default function SaveAgent() {
 
       <div className="p-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {savedAgents.map((agent, index) => (
+          {savedAgents.map((agent) => (
             <div
-              key={index}
+              key={agent.id}
               className="flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white/90 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
             >
               <div className="p-5 flex-1">
@@ -42,7 +49,7 @@ export default function SaveAgent() {
                   <p className="flex items-center gap-2">
                     <User className="h-4 w-4 text-slate-400" />
                     <span className="truncate">
-                      {data?.agentProfiles.find((p) => p.id === agent.profileId)?.name || 'No Profile'}
+                      {profileById.get(agent.profileId)?.name || 'No Profile'}
                     </span>
                   </p>
                   <p className="flex items-center gap-2">
@@ -65,7 +72,7 @@ export default function SaveAgent() {
                   Load
                 </button>
                 <button
-                  onClick={() => handleDeleteAgent(index)}
+                  onClick={() => handleDeleteAgent(agent.id)}
                   className="inline-flex items-center justify-center rounded-md bg-red-600 px-3 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-red-700"
                   title="Delete Agent"
                 >

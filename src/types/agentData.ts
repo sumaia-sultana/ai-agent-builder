@@ -27,6 +27,7 @@ export interface AgentData {
 }
 
 export interface SavedAgent {
+  id: string
   name: string
   profileId: string
   skillIds: string[]
