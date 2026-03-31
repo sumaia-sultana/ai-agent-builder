@@ -20,7 +20,11 @@ The final result is a modern, responsive AI agent builder where users can visual
  * Git & GitHub
  *ESLint / Prettier (code quality)
 
-## 3. Task 1 – Bug Fixes & Performance Issues
+## 2.1. Task-1 - Tailwind CSS Set up  & dnd-kit install
+    - Tailwind CSS was not previously configured in the project. I installed and               configured Tailwind to support utility-based styling.
+    - dnd-kit installed to implement the drag and drop.
+
+## 3. Task 2 – Bug Fixes & Performance Issues
 
 Several intentional React issues were identified and resolved.
 
@@ -36,14 +40,19 @@ Some components were re-rendering frequently due to improper state structure and
   - Used useMemo for computed values.
 
 ## 2. Improper useEffect Usage
-
-Some effects triggered infinite loops because dependencies were incorrect.
+# Problems:
+  - Used too much unnecessary ueffects triggered unnecessary rendering because    
+    dependencies were incorrect and it don't capture the updated value.
+  - unecessary API calls : The original implementation triggered fetchAPI() whenever a       profile, skill, or layer was selected. Since the configuration data is static and        does not change during user interaction, these repeated API calls were unnecessary       and caused avoidable network delays and UI re-renders
+  - Stale Closure in useEffect which caused the effect to capture the initial value and      ignore later updates.
 
 # Solution
 
   - Added correct dependency arrays.
-  - Removed redundant effects.
-  - Moved side-effects to appropriate lifecycle hooks.
+  - Removed unnecessary effects.
+  - Moved side-effects to appropriate hooks.
+  - refactored the logic to fetch configuration data only once on component mount
+    using useEffect, improving performance and responsiveness.
  
 ## 3. State updates were causing large component trees to re-render.
 
@@ -57,55 +66,49 @@ Some effects triggered infinite loops because dependencies were incorrect.
 
 The project structure was reorganized for better maintainability.
 
-Previous Issues
-Large monolithic components
-Poor separation of logic
-Mixed UI and business logic
-Improvements
-Components split into reusable units
-Logic extracted into custom hooks
-Clear folder structure implemented
+# Previous Issues:
+- Large monolithic components
+- Poor separation of logic
+- Mixed UI and business logic
+# Improvements:
+- Components split into reusable units
+- Logic extracted into custom hooks
+- Clear folder structure implemented
  
-Benefits:
-
-Improved readability
-Reusable components
-Better scalability
+# Benefits:
+- Improved readability
+- Reusable components
+- Better scalability
 ## 5. Task 3 – Improved State Management
 
 State management was redesigned to reduce complexity.
 
 # Problems
-Excessive prop drilling
-Global state mismanagement
+- Excessive prop drilling due to split the code into reusable components.
 # Solution
+ - Implemented React Context API with custom hooks.
 
-Implemented React Context API with custom hooks.
-
-Benefits:
-
-Cleaner component communication
-Reduced prop drilling
-Centralized agent state
+# Benefits:
+ - Cleaner component communication
+ - Reduced prop drilling
+ - Centralized agent state
 ## 6. Task 4 – UI/UX Redesign
-
-The original UI relied on basic dropdowns, which provided poor usability.
-
-Previous UI Problems
-Confusing user flow
-Limited interaction
-Poor visual hierarchy
-New Design
+ The original UI relied on basic dropdowns, which provided poor usability.
+ # Previous UI Problems:
+  - Confusing user flow
+  - Limited interaction
+  - Poor visual hierarchy
+  - New Design
 
 ## The interface was redesigned to a visual drag-and-drop builder.
 
-New UI components include:
+# New UI components include:
 
-Sidebar with draggable blocks
-Canvas workspace
-Interactive agent nodes
-Visual drag feedback
-Hover and transition effects
+ - Sidebar with draggable blocks
+ - Canvas workspace
+ - Interactive agent nodes
+ - Visual drag feedback
+ - Hover and transition effects
 ## UI Layout
  -------------------------------------
 | Sidebar |        Canvas            |
@@ -114,10 +117,10 @@ Hover and transition effects
 | Logic   |                          |
  -------------------------------------
 ## Features
-Drag components from sidebar
-Drop into builder canvas
-Rearrange elements
-Visual feedback during drag operations
+ - Drag components from sidebar
+ - Drop into builder canvas
+ - Rearrange elements
+ - Visual feedback during drag operations
 
 ## 7. Drag and Drop Implementation
 
@@ -140,39 +143,38 @@ Modern visual interaction
 
 ## Several strategies were implemented to improve performance.
 
-# 1. Lazy Loading
+# i. Lazy Loading
 
-Heavy components were loaded dynamically.
+     - Heavy components were loaded dynamically.
+ 
+# ii. Memoization
+
+  - Used useMemo and useCallback to prevent expensive recalculations.
+
+# iii. Optimized List Rendering
+  - Proper use of key
+  - Avoid unnecessary DOM updates
 
  
-# 2. Memoization
+# iv. Component Isolation
 
-Used useMemo and useCallback to prevent expensive recalculations.
-
-# 3. Optimized List Rendering
-Proper use of key
-Avoid unnecessary DOM updates
-
- 
-# 4. Component Isolation
-
-Breaking components into smaller pieces reduced unnecessary rendering.
+     - Breaking components into smaller pieces reduced unnecessary rendering.
 
 # 9. Accessibility & UX Improvements
 
-Several usability improvements were made.
+ - Several usability improvements were made.
 
 ## UX Improvements
-Clear button labels
-Improved layout hierarchy
-Consistent spacing and alignment
-Loading states for async operations
-Responsive UI for mobile and tablet
-Accessibility
-Semantic HTML elements
-Accessible buttons
-Keyboard-friendly interactions
-Proper focus states
+- Clear button labels
+- Improved layout hierarchy
+- Consistent spacing and alignment
+- Loading states for async operations
+- Responsive UI for mobile and tablet
+- Accessibility
+- Semantic HTML elements
+- Accessible buttons
+- Keyboard-friendly interactions
+- Proper focus states
 ## 10. Responsive Design
 
 The UI was designed to be fully responsive using Tailwind CSS.
@@ -180,8 +182,8 @@ The UI was designed to be fully responsive using Tailwind CSS.
 # Breakpoints supported:
 
 * Mobile
-Tablet
-Desktop
+* Tablet
+* Desktop
  
 ## 11. Final Result
 
